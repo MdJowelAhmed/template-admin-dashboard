@@ -126,7 +126,7 @@ export function AddEditCategoryModal({ open, onClose, mode, category }: AddEditC
           ? 'Create a new category to organize your products'
           : 'Update the category information'
       }
-      size="md"
+      size="xl"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <FormInput
@@ -153,7 +153,7 @@ export function AddEditCategoryModal({ open, onClose, mode, category }: AddEditC
           rows={3}
           {...register('description')}
         />
-
+{/* 
         <FormSelect
           label="Status"
           value={watch('status')}
@@ -162,7 +162,7 @@ export function AddEditCategoryModal({ open, onClose, mode, category }: AddEditC
           placeholder="Select status"
           error={errors.status?.message}
           required
-        />
+        /> */}
 
         <div>
           <label className="text-sm font-medium mb-2 block">Category Image</label>
