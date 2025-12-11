@@ -121,7 +121,7 @@ export default function ChangePassword() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6 max-w-2xl"
+      className="space-y-6 max-w-2xl mx-auto"
     >
       <Card>
         <CardHeader>

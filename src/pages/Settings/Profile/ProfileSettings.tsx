@@ -42,7 +42,7 @@ export default function ProfileSettings() {
       address: '123 Main Street',
       city: 'Dhaka',
       country: 'Bangladesh',
-      bio: 'Dashboard administrator with full access to all features.',
+      // bio: 'Dashboard administrator with full access to all features.',
     },
   })
 
@@ -78,7 +78,7 @@ export default function ProfileSettings() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6 max-w-4xl"
+      className="space-y-6 max-w-4xl mx-auto"
     >
       <Card>
         <CardHeader>
@@ -187,18 +187,7 @@ export default function ProfileSettings() {
 
             <Separator />
 
-            {/* Bio */}
-            <div className="space-y-4">
-              <h3 className="font-semibold">About</h3>
-              <FormTextarea
-                label="Bio"
-                placeholder="Tell us about yourself..."
-                helperText="Max 500 characters"
-                error={errors.bio?.message}
-                rows={4}
-                {...register('bio')}
-              />
-            </div>
+        
 
             <div className="flex justify-end gap-3">
               <Button type="button" variant="outline">

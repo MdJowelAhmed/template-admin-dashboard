@@ -51,7 +51,7 @@ const defaultTerms = `<h1>Terms and Conditions</h1>
 export default function TermsSettings() {
   const [terms, setTerms] = useState(defaultTerms)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [activeTab, setActiveTab] = useState('edit')
+  const [activeTab, setActiveTab] = useState('preview')
 
   const handleSave = async () => {
     setIsSubmitting(true)

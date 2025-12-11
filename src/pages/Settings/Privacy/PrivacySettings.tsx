@@ -73,7 +73,7 @@ const defaultPrivacy = `<h1>Privacy Policy</h1>
 export default function PrivacySettings() {
   const [privacy, setPrivacy] = useState(defaultPrivacy)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [activeTab, setActiveTab] = useState('edit')
+  const [activeTab, setActiveTab] = useState('preview')
 
   const handleSave = async () => {
     setIsSubmitting(true)
