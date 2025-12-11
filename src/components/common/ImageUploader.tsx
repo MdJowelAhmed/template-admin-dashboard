@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { useDropzone } from 'react-dropzone'
+import { useDropzone, type FileRejection } from 'react-dropzone'
 import { Upload, X, Image as ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
@@ -29,11 +29,11 @@ export function ImageUploader({
   const [uploadError, setUploadError] = useState<string | null>(null)
 
   const onDrop = useCallback(
-    (acceptedFiles: File[], rejectedFiles: { errors: { message: string }[] }[]) => {
+    (acceptedFiles: File[], fileRejections: FileRejection[]) => {
       setUploadError(null)
 
-      if (rejectedFiles.length > 0) {
-        const firstError = rejectedFiles[0].errors[0]
+      if (fileRejections.length > 0) {
+        const firstError = fileRejections[0].errors[0]
         setUploadError(firstError.message)
         return
       }
@@ -130,6 +130,3 @@ export function ImageUploader({
     </div>
   )
 }
-
-
-

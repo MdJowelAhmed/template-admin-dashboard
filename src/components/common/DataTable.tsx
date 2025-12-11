@@ -83,7 +83,7 @@ export function DataTable<T>({
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <tr key={`skeleton-${index}`} className="border-b">
-                    {columns.map((column, colIndex) => (
+                    {columns.map((_, colIndex) => (
                       <td key={colIndex} className="px-4 py-3">
                         <div className="h-5 bg-muted animate-pulse rounded" />
                       </td>
