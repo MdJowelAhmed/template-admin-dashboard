@@ -73,3 +73,4 @@ export function generateSKU(categoryPrefix: string): string {
   return `${categoryPrefix}-${timestamp}-${random}`
 }
 
+

@@ -248,3 +248,4 @@ Edit `src/index.css` to customize the color palette:
 
 MIT License
 
+

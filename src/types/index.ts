@@ -189,3 +189,4 @@ export interface DashboardStats {
   pendingOrders: number
 }
 
+

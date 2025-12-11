@@ -1,8 +1,17 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import DashboardLayout from '@/components/layout/DashboardLayout'
+import AuthLayout from '@/components/layout/AuthLayout'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { useAppDispatch } from '@/redux/hooks'
+import { loadUserFromStorage } from '@/redux/slices/authSlice'
 
-// Pages
+// Auth Pages
+import { Login, ForgotPassword, VerifyEmail, ResetPassword } from '@/pages/Auth'
+
+// Dashboard Pages
 import Dashboard from '@/pages/Dashboard'
 import UserList from '@/pages/Users/UserList'
 import UserDetails from '@/pages/Users/UserDetails'
@@ -14,10 +23,34 @@ import TermsSettings from '@/pages/Settings/Terms/TermsSettings'
 import PrivacySettings from '@/pages/Settings/Privacy/PrivacySettings'
 
 function App() {
+  const dispatch = useAppDispatch()
+
+  // Load user from storage on app mount
+  useEffect(() => {
+    dispatch(loadUserFromStorage())
+  }, [dispatch])
+
   return (
-    <>
+    <TooltipProvider>
       <Routes>
-        <Route path="/" element={<DashboardLayout />}>
+        {/* Auth Routes - No sidebar/header */}
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route index element={<Navigate to="/auth/login" replace />} />
+          <Route path="login" element={<Login />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="verify-email" element={<VerifyEmail />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+        </Route>
+
+        {/* Protected Dashboard Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           
@@ -39,11 +72,13 @@ function App() {
             <Route path="privacy" element={<PrivacySettings />} />
           </Route>
         </Route>
+
+        {/* Catch all - redirect to dashboard or login */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />
-    </>
+    </TooltipProvider>
   )
 }
 
 export default App
-

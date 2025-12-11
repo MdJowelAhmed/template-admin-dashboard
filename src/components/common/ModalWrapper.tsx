@@ -19,9 +19,9 @@ interface ModalWrapperProps {
 }
 
 const sizeClasses = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
+  sm: 'max-w-md',
+  md: 'max-w-lg',
+  lg: 'max-w-xl',
   xl: 'max-w-2xl',
   full: 'max-w-4xl',
 }
@@ -47,4 +47,5 @@ export function ModalWrapper({
     </Dialog>
   )
 }
+
 

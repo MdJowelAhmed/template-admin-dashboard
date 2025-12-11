@@ -1,6 +1,5 @@
-
-import { useLocation } from 'react-router-dom'
-import { Menu, Bell, Sun, Moon, Search } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Menu, Bell, Sun, Moon, Search, LogOut, User, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -14,7 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAppDispatch, useAppSelector } from '@/redux/hooks'
 import { toggleSidebar, toggleTheme } from '@/redux/slices/uiSlice'
-// import { cn } from '@/utils/cn'
+import { logout } from '@/redux/slices/authSlice'
+import { getInitials } from '@/utils/formatters'
 
 const routeTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -28,14 +28,21 @@ const routeTitles: Record<string, string> = {
 }
 
 export function Header() {
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { theme } = useAppSelector((state) => state.ui)
+  const { user } = useAppSelector((state) => state.auth)
   const location = useLocation()
 
   const pageTitle = routeTitles[location.pathname] || 'Dashboard'
 
+  const handleLogout = () => {
+    dispatch(logout())
+    navigate('/auth/login')
+  }
+
   return (
-    <header className="sticky top-0 z-30 h-24 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-30 h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-full items-center justify-between px-4 lg:px-6">
         {/* Left side */}
         <div className="flex items-center gap-4">
@@ -50,13 +57,13 @@ export function Header() {
           <div>
             <h1 className="text-xl font-semibold">{pageTitle}</h1>
             <p className="text-sm text-muted-foreground hidden sm:block">
-              Welcome back, Admin
+              Welcome back, {user?.firstName || 'Admin'}
             </p>
           </div>
         </div>
 
         {/* Center - Search (hidden on mobile) */}
-        {/* <div className="hidden md:flex flex-1 max-w-md mx-8">
+        <div className="hidden md:flex flex-1 max-w-md mx-8">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -65,7 +72,7 @@ export function Header() {
               className="pl-9 bg-muted/50"
             />
           </div>
-        </div> */}
+        </div>
 
         {/* Right side */}
         <div className="flex items-center gap-2">
@@ -105,23 +112,36 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" />
-                  <AvatarFallback>AD</AvatarFallback>
+                  <AvatarImage src={user?.avatar} />
+                  <AvatarFallback>
+                    {user ? getInitials(user.firstName, user.lastName) : 'AD'}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">Admin User</p>
-                  <p className="text-xs text-muted-foreground">admin@example.com</p>
+                  <p className="text-sm font-medium">
+                    {user ? `${user.firstName} ${user.lastName}` : 'Admin User'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {user?.email || 'admin@example.com'}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings/profile')}>
+                <User className="h-4 w-4 mr-2" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings/password')}>
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                <LogOut className="h-4 w-4 mr-2" />
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -131,4 +151,3 @@ export function Header() {
     </header>
   )
 }
-
