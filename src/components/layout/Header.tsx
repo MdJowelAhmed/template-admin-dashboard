@@ -56,7 +56,7 @@ export function Header() {
         </div>
 
         {/* Center - Search (hidden on mobile) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
+        {/* <div className="hidden md:flex flex-1 max-w-md mx-8">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -65,7 +65,7 @@ export function Header() {
               className="pl-9 bg-muted/50"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Right side */}
         <div className="flex items-center gap-2">
