@@ -59,7 +59,7 @@ export function DataTable<T>({
                 <th
                   key={String(column.key)}
                   className={cn(
-                    'px-4 py-3 text-left text-sm font-semibold text-white',
+                    'px-4 py-4 text-left text-sm font-semibold text-white',
                     column.sortable && 'cursor-pointer select-none  transition-colors',
                     column.width && `w-[${column.width}]`
                   )}

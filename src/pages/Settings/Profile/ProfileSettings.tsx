@@ -35,13 +35,13 @@ export default function ProfileSettings() {
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: 'Admin',
-      lastName: 'User',
-      email: 'admin@example.com',
-      phone: '+1 234 567 890',
+      firstName: 'Jowel',
+      lastName: 'Ahmed',
+      email: 'mdjowelahmed924@gmail.com',
+      phone: '+1234567890',
       address: '123 Main Street',
-      city: 'New York',
-      country: 'USA',
+      city: 'Dhaka',
+      country: 'Bangladesh',
       bio: 'Dashboard administrator with full access to all features.',
     },
   })
