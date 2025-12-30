@@ -94,7 +94,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full bg-card border-r shadow-lg transition-all duration-300',
+          'fixed top-0 left-0 z-50 h-full bg-card shadow-xl transition-all duration-300',
           'flex flex-col',
           sidebarCollapsed ? 'w-[80px]' : 'w-[280px]',
           'lg:translate-x-0',
