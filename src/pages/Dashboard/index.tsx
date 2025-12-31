@@ -21,6 +21,7 @@ import {
 import { formatCurrency, formatCompactNumber, formatPercentage } from '@/utils/formatters'
 import { cn } from '@/utils/cn'
 import { motion } from 'framer-motion'
+import { AvailableCars, RentalCars, TotalBooking, TotalRevenue } from '@/components/common/svg/dashboardSVG'
 
 // Generate mock data for different years
 const generateYearData = (year: number) => {
@@ -67,22 +68,23 @@ function StatCard({ title, value, change, icon: Icon, description, index }: Stat
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.1 }}
     >
-      <Card className="overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            {title}
-          </CardTitle>
+      <Card className="overflow-hidden shadow-md hover:shadow-[#CEF8DA]">
+        <CardHeader className="flex flex-row items-center gap-3 pb-2">
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Icon className="h-5 w-5 text-primary" />
           </div>
+          <CardTitle className="text-base font-bold text-accent">
+            {title}
+          </CardTitle>
+
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{value}</div>
+          <div className="text-2xl xl:text-3xl font-bold text-accent">{value}</div>
           <div className="flex items-center gap-2 mt-1">
             <span
               className={cn(
                 'flex items-center text-xs font-medium',
-                isPositive ? 'text-success' : 'text-destructive'
+                isPositive ? 'text-accent' : 'text-accent'
               )}
             >
               {isPositive ? (
@@ -112,8 +114,8 @@ const CustomTooltip = ({ active, payload, label }: {
         <p className="font-semibold mb-2">{label}</p>
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 text-sm">
-            <div 
-              className="w-3 h-3 rounded-full" 
+            <div
+              className="w-3 h-3 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
             <span className="text-muted-foreground">{entry.name}:</span>
@@ -136,31 +138,31 @@ export default function Dashboard() {
 
   const stats = [
     {
-      title: 'Total Users',
+      title: 'Total Revenue',
       value: formatCompactNumber(12543),
       change: 12.5,
-      icon: Users,
+      icon: TotalRevenue,
       description: 'vs last month',
     },
     {
       title: 'Total Products',
       value: formatCompactNumber(3420),
       change: 8.2,
-      icon: Package,
+      icon: TotalBooking,
       description: 'vs last month',
     },
     {
       title: 'Categories',
       value: '156',
       change: 3.1,
-      icon: FolderTree,
+      icon: RentalCars,
       description: 'vs last month',
     },
     {
       title: 'Total Revenue',
       value: formatCurrency(845320),
       change: -2.4,
-      icon: DollarSign,
+      icon: AvailableCars,
       description: 'vs last month',
     },
   ]
@@ -234,26 +236,26 @@ export default function Dashboard() {
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis 
-                    dataKey="month" 
+                  <XAxis
+                    dataKey="month"
                     className="text-xs"
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   />
-                  <YAxis 
+                  <YAxis
                     yAxisId="left"
                     className="text-xs"
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                     tickFormatter={(value) => `$${formatCompactNumber(value)}`}
                   />
-                  <YAxis 
-                    yAxisId="right" 
+                  <YAxis
+                    yAxisId="right"
                     orientation="right"
                     className="text-xs"
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                     tickFormatter={(value) => formatCompactNumber(value)}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend 
+                  <Legend
                     wrapperStyle={{ paddingTop: '20px' }}
                     formatter={(value) => <span className="text-sm">{value}</span>}
                   />
@@ -303,15 +305,15 @@ export default function Dashboard() {
                 const data = yearlyData[year]
                 const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0)
                 const isSelected = year === selectedYear
-                
+
                 return (
                   <button
                     key={year}
                     onClick={() => setSelectedYear(year)}
                     className={cn(
                       'p-4 rounded-lg text-left transition-all',
-                      isSelected 
-                        ? 'bg-primary/10 border-2 border-primary' 
+                      isSelected
+                        ? 'bg-primary/10 border-2 border-primary'
                         : 'bg-muted/50 border-2 border-transparent hover:border-muted-foreground/20'
                     )}
                   >
@@ -328,7 +330,7 @@ export default function Dashboard() {
 
       {/* Content Grid */}
       <div className="">
-   
+
 
         {/* Recent Activity */}
         <motion.div

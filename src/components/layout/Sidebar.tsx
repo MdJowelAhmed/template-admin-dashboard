@@ -164,7 +164,7 @@ export function Sidebar() {
                         ? 'bg-primary text-white shadow-md'
                         : 'text-muted-foreground'
                     )}
-                  >
+                  > 
                     <Settings
                       className={cn(
                         'h-5 w-5 flex-shrink-0',
