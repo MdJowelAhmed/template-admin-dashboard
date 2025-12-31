@@ -1,6 +1,15 @@
+import { BookingStatCard } from './BookingStatCard'
+import { BookingTable } from './BookingTable'
+
 const BookingManagement = () => {
     return (
-        <div className="p-6 lg:p-8 bg-[#F0F8FF] min-h-[calc(100vh-4rem)]">BookingManagement</div>
+        <div className="space-y-6">
+            {/* Stats Grid */}
+            <BookingStatCard />
+
+            {/* Bookings Table */}
+            <BookingTable />
+        </div>
     )
 }
 
