@@ -12,10 +12,10 @@ export function BookingStatCard() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className={`${stat.bgColor} rounded-xl p-5 shadow-sm`}
+                        className={`bg-[#FFF] rounded-xl p-5 shadow-sm`}
                     >
                         <div className="flex items-start gap-4">
-                            <div className={`${stat.iconBgColor} p-3 rounded-lg`}>
+                            <div className={` p-3 rounded-lg`}>
                                 <Icon className={`h-6 w-6 ${stat.iconColor}`} />
                             </div>
                             <div className="flex-1">
