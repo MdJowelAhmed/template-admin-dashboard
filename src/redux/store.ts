@@ -4,6 +4,7 @@ import userReducer from './slices/userSlice'
 import productReducer from './slices/productSlice'
 import categoryReducer from './slices/categorySlice'
 import uiReducer from './slices/uiSlice'
+import bookingReducer from './slices/bookingSlice'
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     products: productReducer,
     categories: categoryReducer,
     ui: uiReducer,
+    bookings: bookingReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

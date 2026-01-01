@@ -189,6 +189,28 @@ export interface DashboardStats {
   pendingOrders: number
 }
 
+// ==================== Booking Types ====================
+export interface Booking {
+  id: string
+  startDate: string
+  endDate: string
+  clientName: string
+  carModel: string
+  licensePlate: string
+  plan: string
+  payment: string
+  paymentStatus: 'Paid' | 'Pending'
+  status: BookingStatus
+}
+
+export type BookingStatus = 'Upcoming' | 'Runing' | 'Completed'
+
+export interface BookingFilters {
+  search: string
+  status: BookingStatus | 'all'
+}
+
+
 
 
 

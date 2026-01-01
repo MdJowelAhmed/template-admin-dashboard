@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
-import { Search, Filter, Plus, RefreshCw, Calendar, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
-import { carBookingsData, statusFilterOptions } from './bookingData'
+import { Filter, Plus, RefreshCw, Calendar, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { statusFilterOptions } from './bookingData'
 import {
     Select,
     SelectContent,
@@ -11,58 +11,111 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { useUrlString, useUrlNumber } from '@/hooks/useUrlState'
+import { useAppDispatch, useAppSelector } from '@/redux/hooks'
+import { setFilters, setPage, setLimit, updateBookingStatus } from '@/redux/slices/bookingSlice'
+import { SearchInput } from '@/components/common/SearchInput'
+import { useToast } from '@/components/ui/use-toast'
+import type { BookingStatus } from '@/types'
 
 export function BookingTable() {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [statusFilter, setStatusFilter] = useState('all')
-    const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage, setItemsPerPage] = useState(10)
+    const dispatch = useAppDispatch()
+    const { toast } = useToast()
+    
+    // URL state management
+    const [searchQuery, setSearchQuery] = useUrlString('search', '')
+    const [statusFilter, setStatusFilter] = useUrlString('status', 'all')
+    const [currentPage, setCurrentPage] = useUrlNumber('page', 1)
+    const [itemsPerPage, setItemsPerPage] = useUrlNumber('limit', 10)
 
-    // Filter data based on search and status
-    const filteredData = useMemo(() => {
-        return carBookingsData.filter((booking) => {
-            const matchesSearch =
-                booking.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                booking.carModel.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                booking.id.toLowerCase().includes(searchQuery.toLowerCase())
-            const matchesStatus = statusFilter === 'all' || booking.status === statusFilter
-            return matchesSearch && matchesStatus
-        })
-    }, [searchQuery, statusFilter])
+    // Redux state
+    const { filteredList, pagination, filters } = useAppSelector((state) => state.bookings)
+
+    // Sync URL state with Redux filters
+    useEffect(() => {
+        dispatch(setFilters({
+            search: searchQuery,
+            status: statusFilter as BookingStatus | 'all',
+        }))
+    }, [searchQuery, statusFilter, dispatch])
+
+    // Sync URL pagination with Redux
+    useEffect(() => {
+        dispatch(setPage(currentPage))
+    }, [currentPage, dispatch])
+
+    useEffect(() => {
+        dispatch(setLimit(itemsPerPage))
+    }, [itemsPerPage, dispatch])
 
     // Pagination
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+    const totalPages = pagination.totalPages
     const paginatedData = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage
-        return filteredData.slice(startIndex, startIndex + itemsPerPage)
-    }, [filteredData, currentPage, itemsPerPage])
+        const startIndex = (pagination.page - 1) * pagination.limit
+        return filteredList.slice(startIndex, startIndex + pagination.limit)
+    }, [filteredList, pagination.page, pagination.limit])
 
-    const getStatusButton = (status: string) => {
-        switch (status) {
-            case 'Completed':
-                return (
-                    <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-white text-xs font-semibold w-[120px] justify-center">
-                        <CheckCircle className="h-3.5 w-3.5" />
-                        Completed
+    const handleStatusUpdate = (bookingId: string, newStatus: BookingStatus) => {
+        dispatch(updateBookingStatus({ id: bookingId, status: newStatus }))
+        toast({
+            title: 'Status Updated',
+            description: `Booking status changed to ${newStatus}`,
+        })
+    }
+
+    const getStatusButton = (status: string, bookingId: string) => {
+        const statusOptions: { value: BookingStatus; label: string; icon: typeof CheckCircle }[] = [
+            { value: 'Upcoming', label: 'Upcoming', icon: Calendar },
+            { value: 'Runing', label: 'Running', icon: RefreshCw },
+            { value: 'Completed', label: 'Completed', icon: CheckCircle },
+        ]
+
+        const currentStatusOption = statusOptions.find(opt => opt.value === status)
+        const Icon = currentStatusOption?.icon || CheckCircle
+
+        return (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-white text-xs font-semibold w-[120px] justify-center hover:opacity-90 transition-opacity"
+                        style={{
+                            backgroundColor: status === 'Completed' 
+                                ? '#10b981' 
+                                : status === 'Runing' 
+                                ? '#6366f1' 
+                                : '#3b82f6'
+                        }}
+                    >
+                        <Icon className={`h-3.5 w-3.5 ${status === 'Runing' ? 'animate-spin' : ''}`} />
+                        {status}
                     </button>
-                )
-            case 'Runing':
-                return (
-                    <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-secondary-foreground text-white text-xs font-semibold w-[120px] justify-center">
-                        <RefreshCw className="h-3.5 w-3.5 animate-spin-slow" />
-                        Runing
-                    </button>
-                )
-            case 'Upcoming':
-                return (
-                    <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary-foreground text-white text-xs font-semibold w-[120px] justify-center">
-                        <Calendar className="h-3.5 w-3.5" />
-                        Upcoming
-                    </button>
-                )
-            default:
-                return null
-        }
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                    {statusOptions.map((option) => {
+                        const OptionIcon = option.icon
+                        return (
+                            <DropdownMenuItem
+                                key={option.value}
+                                onClick={() => handleStatusUpdate(bookingId, option.value)}
+                                disabled={status === option.value}
+                                className="flex items-center gap-2 cursor-pointer"
+                            >
+                                <OptionIcon className={`h-4 w-4 ${option.value === 'Runing' ? 'animate-spin' : ''}`} />
+                                <span>{option.label}</span>
+                                {status === option.value && (
+                                    <span className="ml-auto text-xs text-muted-foreground">Current</span>
+                                )}
+                            </DropdownMenuItem>
+                        )
+                    })}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        )
     }
 
     const getPaymentStatusBadge = (status: string) => {
@@ -88,11 +141,11 @@ export function BookingTable() {
             }
         } else {
             pages.push(1)
-            if (currentPage > 3) pages.push('...')
-            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+            if (pagination.page > 3) pages.push('...')
+            for (let i = Math.max(2, pagination.page - 1); i <= Math.min(totalPages - 1, pagination.page + 1); i++) {
                 if (!pages.includes(i)) pages.push(i)
             }
-            if (currentPage < totalPages - 2) pages.push('...')
+            if (pagination.page < totalPages - 2) pages.push('...')
             if (!pages.includes(totalPages)) pages.push(totalPages)
         }
         return pages
@@ -109,31 +162,29 @@ export function BookingTable() {
                     <CardTitle className="text-xl font-bold text-slate-800">Car Bookings</CardTitle>
                     <div className="flex items-center gap-3">
                         {/* Search Input */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search client name & car etc."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-[220px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                            />
-                        </div>
+                        <SearchInput
+                            value={searchQuery}
+                            onChange={setSearchQuery}
+                            placeholder="Search client name & car etc."
+                            className="w-[220px]"
+                        />
 
                         {/* Filter Dropdown */}
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[120px] bg-primary text-white border-0">
-                                <Filter className="h-4 w-4 mr-2" />
-                                <SelectValue placeholder="Filter" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {statusFilterOptions.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <div className="w-[120px]">
+                            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <SelectTrigger className="w-full bg-primary text-white border-0">
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    <SelectValue placeholder="Filter" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {statusFilterOptions.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
                         {/* Add Bookings Button */}
                         <Button className="bg-primary hover:bg-primary/90 text-white">
@@ -158,58 +209,66 @@ export function BookingTable() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 text-accent-foreground">
-                                {paginatedData.map((booking, index) => (
-                                    <motion.tr
-                                        key={`${booking.id}-${index}`}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.05 * index }}
-                                        className="hover:bg-gray-50/50"
-                                    >
-                                        <td className="px-6 py-4 text-sm font-medium text-slate-700">
-                                            {booking.id}
+                                {paginatedData.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                                            No bookings found
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col gap-1 text-xs">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-accent-foreground w-8">Start</span>
-                                                    <span className="bg-secondary text-white px-3 py-1 rounded text-[11px] font-medium min-w-[80px] text-center">
-                                                        {booking.startDate}
+                                    </tr>
+                                ) : (
+                                    paginatedData.map((booking, index) => (
+                                        <motion.tr
+                                            key={`${booking.id}-${index}`}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.05 * index }}
+                                            className="hover:bg-gray-50/50"
+                                        >
+                                            <td className="px-6 py-4 text-sm font-medium text-slate-700">
+                                                {booking.id}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col gap-1 text-xs">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-accent-foreground w-8">Start</span>
+                                                        <span className="bg-secondary text-white px-3 py-1 rounded text-[11px] font-medium min-w-[80px] text-center">
+                                                            {booking.startDate}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-accent-foreground w-8">End</span>
+                                                        <span className="bg-primary-foreground text-white px-3 py-1 rounded text-[11px] font-medium min-w-[80px] text-center">
+                                                            {booking.endDate}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-700 font-medium">
+                                                {booking.clientName}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-sm font-medium text-slate-700">{booking.carModel}</span>
+                                                    <span className="bg-gray-100 text-accent-foreground text-xs px-2 py-0.5 rounded w-fit">
+                                                        {booking.licensePlate}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-accent-foreground w-8">End</span>
-                                                    <span className="bg-primary-foreground text-white px-3 py-1 rounded text-[11px] font-medium min-w-[80px] text-center">
-                                                        {booking.endDate}
-                                                    </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-700 font-medium">
+                                                {booking.plan}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-sm font-semibold text-slate-700">{booking.payment}</span>
+                                                    {getPaymentStatusBadge(booking.paymentStatus)}
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-slate-700 font-medium">
-                                            {booking.clientName}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-sm font-medium text-slate-700">{booking.carModel}</span>
-                                                <span className="bg-gray-100 text-accent-foreground text-xs px-2 py-0.5 rounded w-fit">
-                                                    {booking.licensePlate}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-slate-700 font-medium">
-                                            {booking.plan}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <span className="text-sm font-semibold text-slate-700">{booking.payment}</span>
-                                                {getPaymentStatusBadge(booking.paymentStatus)}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            {getStatusButton(booking.status)}
-                                        </td>
-                                    </motion.tr>
-                                ))}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                {getStatusButton(booking.status, booking.id)}
+                                            </td>
+                                        </motion.tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -236,8 +295,8 @@ export function BookingTable() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(Math.max(1, pagination.page - 1))}
+                                disabled={pagination.page === 1}
                                 className="text-gray-600"
                             >
                                 <ChevronLeft className="h-4 w-4 mr-1" />
@@ -249,10 +308,10 @@ export function BookingTable() {
                                     typeof page === 'number' ? (
                                         <Button
                                             key={index}
-                                            variant={currentPage === page ? 'default' : 'outline'}
+                                            variant={pagination.page === page ? 'default' : 'outline'}
                                             size="sm"
                                             onClick={() => setCurrentPage(page)}
-                                            className={`w-8 h-8 ${currentPage === page ? 'bg-primary text-white' : 'text-gray-600'}`}
+                                            className={`w-8 h-8 ${pagination.page === page ? 'bg-primary text-white' : 'text-gray-600'}`}
                                         >
                                             {page}
                                         </Button>
@@ -267,8 +326,8 @@ export function BookingTable() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(Math.min(totalPages, pagination.page + 1))}
+                                disabled={pagination.page === totalPages}
                                 className="text-gray-600"
                             >
                                 Next
